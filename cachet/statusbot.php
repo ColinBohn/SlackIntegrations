@@ -24,7 +24,11 @@ if ($EXPECTINGREPLY) {
     }
     if (count($SESSION) === 1) {
         writeSession("subject", $reply);
-        reply("Thanks! Which component is affected?\n_You can say: Networking, Phones, Accounts and Authentication, Virtual Desktop, District Websites, or Hosted Services_");
+        $components = json_decode(file_get_contents($cachet_url . "/api/v1/components"), true);
+        $components = $components['data'];
+        $names = array_map(function($item) { return $item['name']; }, $components);
+        $names = implode(', ', $names);
+        reply("Thanks! Which component is affected?\n_You can say:" . $names . "_");
     }
     if (count($SESSION) === 2) {
         $component = json_decode(file_get_contents($cachet_url . "/api/v1/components?name=".urlencode($reply)), true);
@@ -37,17 +41,17 @@ if ($EXPECTINGREPLY) {
         reply("Roger. What is the current status of ".$reply."?\n_You can say: Operational, Performance Issues, Partial Outage, or Major Outage_");
     }
     if (count($SESSION) === 3) {
-        switch ($reply) {
-            case "Operational":
+        switch (strtolower($reply)) {
+            case "operational":
                 $reply = 1;
                 break;
-            case "Performance Issues":
+            case "performance issues":
                 $reply = 2;
                 break;
-            case "Partial Outage":
+            case "partial outage":
                 $reply = 3;
                 break;
-            case "Major Outage":
+            case "major outage":
                 $reply = 4;
                 break;
             default:
